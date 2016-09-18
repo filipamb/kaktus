@@ -1,11 +1,10 @@
 package pl.atendesoftware.amitogo.activities;
 
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.util.Log;
+import android.support.v4.app.FragmentManager;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -15,17 +14,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
 
 import pl.atendesoftware.amitogo.R;
 import pl.atendesoftware.amitogo.fragments.MapFragment;
@@ -37,7 +25,6 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        new WebServiceHandler().execute("http://10.255.1.52:8080/ceu/rs/meterpointlocation");
 
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -52,7 +39,15 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new MapFragment()).commit();
+
+        // Bierzemy fragment Managera
+        FragmentManager fragmentManager =  getSupportFragmentManager();
+
+        // Tworzymy fragment i przypisujemy mu bundle z listą meter pointów
+        MapFragment mapFragment = new MapFragment();
+
+        // Zamieniamy fragment
+        fragmentManager.beginTransaction().replace(R.id.fragment_container, mapFragment).commit();
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -62,6 +57,8 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+
     }
 
     @Override
@@ -116,68 +113,5 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
-    }
-
-
-    private class WebServiceHandler extends AsyncTask<String, Void, String> {
-
-
-        @Override
-        protected String doInBackground(String... urls) {
-
-            try {
-                // zakładamy, że jest tylko jeden URL
-                URL url = new URL(urls[0]);
-                URLConnection connection = url.openConnection();
-
-                // pobranie danych do InputStream
-                InputStream in = new BufferedInputStream(
-                        connection.getInputStream());
-
-                // konwersja InputStream na String
-                // wynik będzie przekazany do metody onPostExecute()
-                return streamToString(in);
-
-            } catch (Exception e) {
-                // obsłuż wyjątek
-                Log.d(MainActivity.class.getSimpleName(), e.toString());
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-
-            try {
-                JSONObject json = new JSONObject(result);
-                System.out.println(json.optString("x"));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-        }
-
-
-    }
-
-    public static String streamToString(InputStream is) {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-        StringBuilder stringBuilder = new StringBuilder();
-        String line = null;
-
-        try {
-
-            while ((line = reader.readLine()) != null) {
-                stringBuilder.append(line + "\n");
-            }
-
-            reader.close();
-
-        } catch (IOException e) {
-            // obsłuż wyjątek
-            Log.d(MainActivity.class.getSimpleName(), e.toString());
-        }
-
-        return stringBuilder.toString();
     }
 }

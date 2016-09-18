@@ -6,4 +6,12 @@
 
     <string name="action_settings">Settings</string>
     <string name="title_activity_maps">Map</string>
+
+    <!-- Marker labels -->
+    <string name="station_marker_title">Station</string>
+    <string name="meter_point_market_title">Meter Points</string>
+
+    <!-- Activity labels-->
+    <string name="station_details_activity_title">Station details</string>
+    <string name="meter_point_list_activity_title">Meter point list</string>
 </resources>
