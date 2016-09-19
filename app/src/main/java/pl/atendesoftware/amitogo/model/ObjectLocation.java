@@ -1,34 +1,31 @@
 package pl.atendesoftware.amitogo.model;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 
 public class ObjectLocation {
 
-    private long meterId;
-    private double latitude;
-    private double longitude;
+    private long objectId;
+    private Double latitude = null;
+    private Double longitude = null;
 
     public ObjectLocation() {
     }
 
-    public ObjectLocation(long meterId, double latitude, double longitude) {
-        this.meterId = meterId;
+    public ObjectLocation(long objectId, Double latitude, Double longitude) {
+        this.objectId = objectId;
         this.latitude = latitude;
         this.longitude = longitude;
     }
 
 
-    public long getMeterId() {
-        return meterId;
+    public long getObjectId() {
+        return objectId;
     }
 
-    public void setMeterId(long meterId) {
-        this.meterId = meterId;
+    public void setObjectId(long objectId) {
+        this.objectId = objectId;
     }
 
-    public double getLatitude() {
+    public Double getLatitude() {
         return latitude;
     }
 
@@ -36,11 +33,20 @@ public class ObjectLocation {
         this.latitude = latitude;
     }
 
-    public double getLongitude() {
+    public Double getLongitude() {
         return longitude;
     }
 
     public void setLongitude(double longitude) {
         this.longitude = longitude;
+    }
+
+    @Override
+    public String toString() {
+        return "ObjectLocation{" +
+                "objectId=" + objectId +
+                ", latitude=" + latitude +
+                ", longitude=" + longitude +
+                '}';
     }
 }
