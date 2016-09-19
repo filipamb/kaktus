@@ -17,6 +17,7 @@ import android.view.MenuItem;
 
 import pl.atendesoftware.amitogo.R;
 import pl.atendesoftware.amitogo.fragments.MapFragment;
+import pl.atendesoftware.amitogo.webservice.MeterPointLocationHandler;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -57,6 +58,9 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        MeterPointLocationHandler meterPointLocationHandler = new MeterPointLocationHandler(this);
+        meterPointLocationHandler.execute("http://192.168.0.14:8080/messenger/webapi/getmploc");
 
 
     }

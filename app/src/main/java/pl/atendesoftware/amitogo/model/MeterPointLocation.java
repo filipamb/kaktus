@@ -4,16 +4,16 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 
-public class ObjectLocation {
+public class MeterPointLocation {
 
     private long meterId;
-    private double latitude;
-    private double longitude;
+    private Double latitude;
+    private Double longitude;
 
-    public ObjectLocation() {
+    public MeterPointLocation() {
     }
 
-    public ObjectLocation(long meterId, double latitude, double longitude) {
+    public MeterPointLocation(long meterId, Double latitude, Double longitude) {
         this.meterId = meterId;
         this.latitude = latitude;
         this.longitude = longitude;
@@ -28,7 +28,7 @@ public class ObjectLocation {
         this.meterId = meterId;
     }
 
-    public double getLatitude() {
+    public Double getLatitude() {
         return latitude;
     }
 
@@ -36,7 +36,7 @@ public class ObjectLocation {
         this.latitude = latitude;
     }
 
-    public double getLongitude() {
+    public Double getLongitude() {
         return longitude;
     }
 
