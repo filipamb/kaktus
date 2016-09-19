@@ -48,8 +48,8 @@ import pl.atendesoftware.amitogo.services.LocationUpdateService;
 public class MapFragment extends Fragment
         implements OnMapReadyCallback{
 
-    public static final String REST_URL_METER_POINT_LOCATION = "http://192.168.0.14:8080/messenger/webapi/getmploc";
-    public static final String REST_URL_STATION_LOCATION = "http://192.168.0.14:8080/messenger/webapi/getstatloc";
+    public static final String REST_URL_METER_POINT_LOCATION = "http://10.255.1.52:8080/ceu/rs/meterpointlocation";
+    public static final String REST_URL_STATION_LOCATION = "http://10.255.1.52:8080/ceu/rs/stationlocation";
 
     private FragmentActivity mContext = null;
     private MapView mMapView = null;
@@ -203,17 +203,19 @@ public class MapFragment extends Fragment
                 JSONArray jsonArray = new JSONArray(values[0]);
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject jsonObject = jsonArray.getJSONObject(i);
-                    ObjectLocation mpl = new ObjectLocation(
-                            jsonObject.getLong("objectId"),
-                            jsonObject.getDouble("latitude"),
-                            jsonObject.getDouble("longitude"));
+                    ObjectLocation meterPointLocation = new ObjectLocation(
+                            jsonObject.getLong("meterPointId"),
+                            jsonObject.getDouble("x"),
+                            jsonObject.getDouble("y"));
 
-                    Marker marker = mMap.addMarker(new MarkerOptions()
-                            .position(new LatLng(mpl.getLatitude(), mpl.getLongitude()))
-                            .title(getString(R.string.meter_point_market_title))
-                            .snippet(String.valueOf(mpl.getMeterId()))
-                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-                    meterPointMarkerSet.add(marker);
+                    if (meterPointLocation.getLatitude() != 0 && meterPointLocation.getLongitude() != 0) {
+                        Marker marker = mMap.addMarker(new MarkerOptions()
+                                .position(new LatLng(meterPointLocation.getLatitude(), meterPointLocation.getLongitude()))
+                                .title(getString(R.string.meter_point_market_title))
+                                .snippet(String.valueOf(meterPointLocation.getMeterId()))
+                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                        meterPointMarkerSet.add(marker);
+                    }
 
                 }
             } catch (JSONException e) {
@@ -295,17 +297,20 @@ public class MapFragment extends Fragment
                 JSONArray jsonArray = new JSONArray(values[0]);
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject jsonObject = jsonArray.getJSONObject(i);
-                    ObjectLocation mpl = new ObjectLocation(
-                            jsonObject.getLong("objectId"),
-                            jsonObject.getDouble("latitude"),
-                            jsonObject.getDouble("longitude"));
+                    ObjectLocation stationLocation = new ObjectLocation(
+                            jsonObject.getLong("stationId"),
+                            jsonObject.getDouble("x"),
+                            jsonObject.getDouble("y"));
 
-                    Marker marker = mMap.addMarker(new MarkerOptions()
-                            .position(new LatLng(mpl.getLatitude(), mpl.getLongitude()))
-                            .title(getString(R.string.station_marker_title))
-                            .snippet(String.valueOf(mpl.getMeterId()))
-                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
-                    stationMarkerSet.add(marker);
+                    if (stationLocation.getLatitude() != 0 && stationLocation.getLongitude() != 0) {
+
+                        Marker marker = mMap.addMarker(new MarkerOptions()
+                                .position(new LatLng(stationLocation.getLatitude(), stationLocation.getLongitude()))
+                                .title(getString(R.string.station_marker_title))
+                                .snippet(String.valueOf(stationLocation.getMeterId()))
+                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                        stationMarkerSet.add(marker);
+                    }
 
                 }
             } catch (JSONException e) {
