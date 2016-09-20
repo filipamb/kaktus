@@ -19,16 +19,13 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import pl.atendesoftware.amitogo.R;
-import pl.atendesoftware.amitogo.activities.MeterPointListActivity;
-import pl.atendesoftware.amitogo.activities.StationDetailsActivity;
-import pl.atendesoftware.amitogo.database.DatabaseAdapter;
+import pl.atendesoftware.amitogo.database.DatabaseWriterAdapter;
 import pl.atendesoftware.amitogo.model.MeterPointLocation;
 import pl.atendesoftware.amitogo.services.LocationUpdateService;
 
@@ -38,12 +35,15 @@ public class MapFragment extends Fragment
     public static final String REST_URL_METER_POINT_LOCATION = "http://10.255.1.52:8080/ceu/rs/meterpointlocation";
     public static final String REST_URL_STATION_LOCATION = "http://10.255.1.52:8080/ceu/rs/stationlocation";
 
+    private LatLngBounds POLAND_BOUNDS = new LatLngBounds(
+            new LatLng(49.0300,14.1400), new LatLng(55.9500,24.1600));
+    private LatLng ATENDE = new LatLng(52.2350999,21.09921589999999);
     private FragmentActivity mContext = null;
     private MapView mMapView = null;
     private GoogleMap mMap = null;
     private LocationUpdateReceiver mLocationUpdateReceiver = null;
 
-    private DatabaseAdapter databaseAdapter;
+    private DatabaseWriterAdapter databaseAdapter;
     Set<MeterPointLocation> allMeterPointLocations;
 
     @Nullable
@@ -60,7 +60,7 @@ public class MapFragment extends Fragment
 
         mContext.startService(new Intent(mContext, LocationUpdateService.class));
 
-        databaseAdapter = new DatabaseAdapter(mContext);
+        databaseAdapter = new DatabaseWriterAdapter(mContext);
         databaseAdapter.open();
 
         return view;
@@ -110,6 +110,8 @@ public class MapFragment extends Fragment
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.setMyLocationEnabled(true);
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ATENDE,4));
 
         allMeterPointLocations = databaseAdapter.getAllMeterPointLocations();
         for(MeterPointLocation mpl: allMeterPointLocations){
