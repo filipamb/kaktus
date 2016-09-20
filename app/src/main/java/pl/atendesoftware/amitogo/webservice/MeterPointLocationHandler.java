@@ -5,11 +5,6 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,28 +16,35 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Set;
 
-import pl.atendesoftware.amitogo.R;
 import pl.atendesoftware.amitogo.activities.MainActivity;
-import pl.atendesoftware.amitogo.model.ObjectLocation;
+import pl.atendesoftware.amitogo.database.DatabaseAdapter;
+import pl.atendesoftware.amitogo.model.MeterPointLocation;
+
+// ASYNC TASK DO POBIERANIA DANYCH O PP
 
 public class MeterPointLocationHandler extends AsyncTask<String, String, String> {
 
-    private ProgressDialog dialog;
-    private Context mContext;
     private int count = 0;
-    public MeterPointLocationHandler (Context context){
-        mContext = context;
+
+    private ProgressDialog dialog;
+    private Context context;
+    private DatabaseAdapter databaseAdapter;
+
+    public MeterPointLocationHandler(Context context) {
+        this.context = context;
     }
-
-
-
 
     @Override
     protected void onPreExecute() {
-        dialog = new ProgressDialog(mContext);
-        dialog.setMessage("Downloading object locations");
+        dialog = new ProgressDialog(context);
+        dialog.setTitle("Downloading...");
         dialog.show();
+
+        databaseAdapter = new DatabaseAdapter(context);
+        databaseAdapter.open();
+
     }
 
     @Override
@@ -70,10 +72,8 @@ public class MeterPointLocationHandler extends AsyncTask<String, String, String>
     @Override
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
-        if (dialog != null && dialog.isShowing())
-            dialog.dismiss();
-        Log.i(this.getClass().getSimpleName(),"NUMBER OF OBJECTS " + count);
-
+        databaseAdapter.close();
+        dialog.dismiss();
 
     }
 
@@ -83,19 +83,13 @@ public class MeterPointLocationHandler extends AsyncTask<String, String, String>
             JSONArray jsonArray = new JSONArray(values[0]);
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
-                ObjectLocation meterPointLocation = new ObjectLocation(
+                databaseAdapter.createMeterPointLocation(
                         jsonObject.getLong("meterPointId"),
                         jsonObject.getDouble("x"),
                         jsonObject.getDouble("y"));
-
-                if (meterPointLocation.getLatitude() != 0 && meterPointLocation.getLongitude() != 0 &&
-                        meterPointLocation.getLatitude() != null & meterPointLocation.getLatitude() != null) {
-                    count++;
-                }
-
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+            Log.i(this.getClass().getSimpleName(),"Json exception " + count++);
         }
     }
 

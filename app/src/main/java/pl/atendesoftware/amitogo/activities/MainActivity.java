@@ -60,7 +60,8 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         MeterPointLocationHandler meterPointLocationHandler = new MeterPointLocationHandler(this);
-        meterPointLocationHandler.execute("http://10.255.0.85:8080/ceu/rs/meterpointlocation");
+        meterPointLocationHandler.execute("http://192.168.0.14:8080/messenger/webapi/getmploc");
+
 
     }
 
