@@ -16,11 +16,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Set;
 
 import pl.atendesoftware.amitogo.activities.MainActivity;
-import pl.atendesoftware.amitogo.database.DatabaseAdapter;
-import pl.atendesoftware.amitogo.model.MeterPointLocation;
+import pl.atendesoftware.amitogo.database.DatabaseWriterAdapter;
 
 // ASYNC TASK DO POBIERANIA DANYCH O PP
 
@@ -30,7 +28,7 @@ public class MeterPointLocationHandler extends AsyncTask<String, String, String>
 
     private ProgressDialog dialog;
     private Context context;
-    private DatabaseAdapter databaseAdapter;
+    private DatabaseWriterAdapter databaseAdapter;
 
     public MeterPointLocationHandler(Context context) {
         this.context = context;
@@ -42,7 +40,7 @@ public class MeterPointLocationHandler extends AsyncTask<String, String, String>
         dialog.setTitle("Downloading...");
         dialog.show();
 
-        databaseAdapter = new DatabaseAdapter(context);
+        databaseAdapter = new DatabaseWriterAdapter(context);
         databaseAdapter.open();
 
     }
