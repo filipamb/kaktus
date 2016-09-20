@@ -25,6 +25,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.util.Set;
 
 import pl.atendesoftware.amitogo.R;
+import pl.atendesoftware.amitogo.database.DatabaseReaderAdapter;
 import pl.atendesoftware.amitogo.database.DatabaseWriterAdapter;
 import pl.atendesoftware.amitogo.model.MeterPointLocation;
 import pl.atendesoftware.amitogo.services.LocationUpdateService;
@@ -43,7 +44,7 @@ public class MapFragment extends Fragment
     private GoogleMap mMap = null;
     private LocationUpdateReceiver mLocationUpdateReceiver = null;
 
-    private DatabaseWriterAdapter databaseAdapter;
+    private DatabaseReaderAdapter databaseReaderAdapter;
     Set<MeterPointLocation> allMeterPointLocations;
 
     @Nullable
@@ -60,8 +61,8 @@ public class MapFragment extends Fragment
 
         mContext.startService(new Intent(mContext, LocationUpdateService.class));
 
-        databaseAdapter = new DatabaseWriterAdapter(mContext);
-        databaseAdapter.open();
+        databaseReaderAdapter = new DatabaseReaderAdapter(mContext);
+        databaseReaderAdapter.open();
 
         return view;
     }
@@ -113,7 +114,7 @@ public class MapFragment extends Fragment
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ATENDE,4));
 
-        allMeterPointLocations = databaseAdapter.getAllMeterPointLocations();
+        allMeterPointLocations = databaseReaderAdapter.getAllMeterPointLocations();
         for(MeterPointLocation mpl: allMeterPointLocations){
             mMap.addMarker(new MarkerOptions()
                     .position(new LatLng(mpl.getLatitude(), mpl.getLongitude()))
@@ -122,7 +123,7 @@ public class MapFragment extends Fragment
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
         }
 
-        databaseAdapter.close();
+        databaseReaderAdapter.close();
     }
 
     private class LocationUpdateReceiver extends BroadcastReceiver {
