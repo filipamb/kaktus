@@ -1,5 +1,7 @@
 package pl.atendesoftware.amitogo.activities;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -31,16 +33,6 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
-
         // Bierzemy fragment Managera
         FragmentManager fragmentManager =  getSupportFragmentManager();
 
@@ -59,10 +51,8 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        MeterPointLocationHandler meterPointLocationHandler = new MeterPointLocationHandler(this);
-        meterPointLocationHandler.execute("http://192.168.0.14:8080/messenger/webapi/getmploc");
-
-
+        //MeterPointLocationHandler meterPointLocationHandler = new MeterPointLocationHandler(this);
+        //meterPointLocationHandler.execute("http://192.168.0.14:8080/messenger/webapi/getmploc");
     }
 
     @Override
@@ -107,6 +97,12 @@ public class MainActivity extends AppCompatActivity
                 fragment = new MapFragment();
                 break;
             case R.id.mode_3D:
+                break;
+            case R.id.logout:
+                getSharedPreferences("amitogo", Context.MODE_PRIVATE).edit().putBoolean("loggedIn",false).apply();
+                Intent intent = new Intent(MainActivity.this,LoginActivity.class);
+                startActivity(intent);
+                finish();
                 break;
             case R.id.settings:
                 break;

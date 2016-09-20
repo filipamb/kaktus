@@ -12,6 +12,7 @@ import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -133,7 +134,6 @@ public class MapFragment extends Fragment
     private void updateMapPosition(Location location) {
         if (mMap != null)
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 15));
+        Toast.makeText(mContext, "" + mMap.getProjection().getVisibleRegion().latLngBounds, Toast.LENGTH_LONG).show();
     }
-
-
 }
