@@ -60,8 +60,8 @@ public class MapFragment extends Fragment
 
         mContext.startService(new Intent(mContext, LocationUpdateService.class));
 
-    /*    databaseAdapter = new DatabaseAdapter(mContext);
-        databaseAdapter.open();*/
+        databaseAdapter = new DatabaseAdapter(mContext);
+        databaseAdapter.open();
 
         return view;
     }
@@ -111,16 +111,16 @@ public class MapFragment extends Fragment
         mMap = googleMap;
         mMap.setMyLocationEnabled(true);
 
-        /*allMeterPointLocations = databaseAdapter.getAllMeterPointLocations();
+        allMeterPointLocations = databaseAdapter.getAllMeterPointLocations();
         for(MeterPointLocation mpl: allMeterPointLocations){
             mMap.addMarker(new MarkerOptions()
                     .position(new LatLng(mpl.getLatitude(), mpl.getLongitude()))
                     .title(getString(R.string.meter_point_market_title))
                     .snippet(String.valueOf(mpl.getMeterId()))
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-        }*/
+        }
 
-//        databaseAdapter.close();
+        databaseAdapter.close();
     }
 
     private class LocationUpdateReceiver extends BroadcastReceiver {
