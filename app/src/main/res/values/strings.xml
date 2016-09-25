@@ -14,4 +14,10 @@
     <!-- Activity labels-->
     <string name="station_details_activity_title">Station details</string>
     <string name="meter_point_list_activity_title">Meter point list</string>
+
+    <!--Database download dialog-->
+    <string name="download_db_dialog_title">App\'s first running</string>
+    <string name="download_db_dialog_message">Application is running for the first time. You need to download some data. Do you agree?</string>
+    <string name="download_db_dialog_positive_button_name">Yes</string>
+    <string name="download_db_dialog_negative_button_name">No</string>
 </resources>

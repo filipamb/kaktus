@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +20,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -38,12 +40,19 @@ public class MapFragment extends Fragment
     public static final String REST_URL_STATION_LOCATION = "http://10.255.1.52:8080/ceu/rs/stationlocation";
 
     private LatLngBounds POLAND_BOUNDS = new LatLngBounds(
-            new LatLng(49.0300,14.1400), new LatLng(55.9500,24.1600));
-    private LatLng ATENDE = new LatLng(52.2350999,21.09921589999999);
+            new LatLng(49.0300, 14.1400), new LatLng(55.9500, 24.1600));
+    private LatLng ATENDE = new LatLng(52.2350999, 21.09921589999999);
     private FragmentActivity mContext = null;
     private MapView mMapView = null;
     private GoogleMap mMap = null;
     private LocationUpdateReceiver mLocationUpdateReceiver = null;
+
+    // wartosci do lokalizacji mapy
+    private static int CAMERA_MOVE_REACT_THRESHOLD_MS = 500;
+    private long lastCallMs = Long.MIN_VALUE;
+    private LatLngBounds currentCameraBounds = new LatLngBounds(
+            new LatLng(49.0300, 14.1400), new LatLng(55.9500, 24.1600));
+
 
     private DatabaseReaderAdapter databaseReaderAdapter;
     Set<MeterPointLocation> allMeterPointLocations;
@@ -63,8 +72,6 @@ public class MapFragment extends Fragment
         mContext.startService(new Intent(mContext, LocationUpdateService.class));
 
         databaseReaderAdapter = new DatabaseReaderAdapter(mContext);
-        databaseReaderAdapter.open();
-
         return view;
     }
 
@@ -113,18 +120,42 @@ public class MapFragment extends Fragment
         mMap = googleMap;
         mMap.setMyLocationEnabled(true);
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ATENDE,4));
+        mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
 
-        allMeterPointLocations = databaseReaderAdapter.getAllMeterPointLocations();
-        for(MeterPointLocation mpl: allMeterPointLocations){
-            mMap.addMarker(new MarkerOptions()
-                    .position(new LatLng(mpl.getLatitude(), mpl.getLongitude()))
-                    .title(getString(R.string.meter_point_market_title))
-                    .snippet(String.valueOf(mpl.getMeterId()))
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-        }
 
-        databaseReaderAdapter.close();
+                                           @Override
+                                           public void onCameraChange(CameraPosition cameraPosition) {
+                                               LatLngBounds bounds = mMap.getProjection().getVisibleRegion().latLngBounds;
+                                               // Check whether the camera changes report the same boundaries (?!), yes, it happens
+                                               if (currentCameraBounds.northeast.latitude == bounds.northeast.latitude
+                                                       && currentCameraBounds.northeast.longitude == bounds.northeast.longitude
+                                                       && currentCameraBounds.southwest.latitude == bounds.southwest.latitude
+                                                       && currentCameraBounds.southwest.longitude == bounds.southwest.longitude) {
+                                                   return;
+                                               }
+
+                                               final long snap = System.currentTimeMillis();
+                                               if (lastCallMs + CAMERA_MOVE_REACT_THRESHOLD_MS > snap) {
+                                                   lastCallMs = snap;
+                                                   return;
+                                               }
+
+                                               Log.i(this.getClass().getName(), "On camera Change!!!!!!!!!!!!!!");
+
+
+                                               /*databaseReaderAdapter.open();
+                                               Set<MeterPointLocation> meterPointsByBounds = databaseReaderAdapter.getMeterPointsByBounds(bounds);
+                                               databaseReaderAdapter.close();
+                                               for(MeterPointLocation mpl:meterPointsByBounds){
+                                                   Log.i(this.getClass().getName(),"Meter point with id " + mpl.getMeterId() + " longitude " +mpl.getLongitude()+ " and latitude " + mpl.getLatitude());
+                                               }*/
+                                               lastCallMs = snap;
+                                               currentCameraBounds = bounds;
+
+                                           }
+                                       }
+
+            );
     }
 
     private class LocationUpdateReceiver extends BroadcastReceiver {
@@ -139,4 +170,6 @@ public class MapFragment extends Fragment
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 15));
         Toast.makeText(mContext, "" + mMap.getProjection().getVisibleRegion().latLngBounds, Toast.LENGTH_LONG).show();
     }
+
+
 }

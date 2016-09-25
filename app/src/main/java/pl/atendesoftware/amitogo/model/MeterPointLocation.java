@@ -1,24 +1,21 @@
 package pl.atendesoftware.amitogo.model;
 
-import android.os.Parcel;
-import android.os.Parcelable;
 
 
 public class MeterPointLocation {
 
     private long meterId;
-    private Double latitude;
-    private Double longitude;
+    private double latitude;
+    private double longitude;
 
     public MeterPointLocation() {
     }
 
-    public MeterPointLocation(long meterId, Double latitude, Double longitude) {
+    public MeterPointLocation(long meterId, double latitude, double longitude) {
         this.meterId = meterId;
         this.latitude = latitude;
         this.longitude = longitude;
     }
-
 
     public long getMeterId() {
         return meterId;
@@ -28,7 +25,7 @@ public class MeterPointLocation {
         this.meterId = meterId;
     }
 
-    public Double getLatitude() {
+    public double getLatitude() {
         return latitude;
     }
 
@@ -36,7 +33,7 @@ public class MeterPointLocation {
         this.latitude = latitude;
     }
 
-    public Double getLongitude() {
+    public double getLongitude() {
         return longitude;
     }
 

@@ -1,32 +1,37 @@
 package pl.atendesoftware.amitogo.activities;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import pl.atendesoftware.amitogo.R;
 import pl.atendesoftware.amitogo.fragments.MapFragment;
-import pl.atendesoftware.amitogo.webservice.MeterPointLocationHandler;
+import pl.atendesoftware.amitogo.services.MeterPointLocationService;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    private Context mContext;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mContext = this;
 
 
         setContentView(R.layout.activity_main);
@@ -48,12 +53,39 @@ public class MainActivity extends AppCompatActivity
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
+
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        MeterPointLocationHandler meterPointLocationHandler = new MeterPointLocationHandler(this);
-        meterPointLocationHandler.execute("http://10.255.1.52:8080/ceu/rs/meterpointlocation");
+        // sprawdzenie, czy pobralismy juz baze danych
+        if(!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(MeterPointLocationService.DB_DOWNLOADED_PREFERENCE,false)) {
+            Log.i(this.getClass().getName(), "Shared preference FALSE");
 
+            AlertDialog.Builder downloadDatabaseDialogBuilder = new AlertDialog.Builder(mContext);
+
+            downloadDatabaseDialogBuilder.setMessage(getString(R.string.download_db_dialog_message))
+                    .setCancelable(false)
+                    .setPositiveButton(getString(R.string.download_db_dialog_positive_button_name), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                            Intent intent = new Intent(mContext,MeterPointLocationService.class);
+                            startService(intent);
+                        }
+                    })
+                    .setNegativeButton(getString(R.string.download_db_dialog_negative_button_name), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            finish();
+                        }
+                    });
+
+            AlertDialog downloadDatabaseDialog = downloadDatabaseDialogBuilder.create();
+            downloadDatabaseDialog.setTitle(getString(R.string.download_db_dialog_title));
+            downloadDatabaseDialog.show();
+        } else {
+            Log.i(this.getClass().getName(), "Shared preference TRUE");
+        }
 
     }
 

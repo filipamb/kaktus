@@ -3,6 +3,14 @@ package pl.atendesoftware.amitogo.database;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteStatement;
+import android.provider.ContactsContract;
+import android.util.Log;
+
+import java.util.List;
+
+import pl.atendesoftware.amitogo.model.MeterPointLocation;
+import pl.atendesoftware.amitogo.model.MeterPointLocationToDatabase;
 
 public class DatabaseWriterAdapter {
 
@@ -28,7 +36,7 @@ public class DatabaseWriterAdapter {
         databaseHelper.close();
     }
 
-    public long createMeterPointLocation(long id, Double latitude, Double longitude) {
+    public long createMeterPointLocation(long id, long latitude, long longitude) {
         ContentValues values = new ContentValues();
         values.put(DatabaseStatics.COLUMN_ID, id);
         values.put(DatabaseStatics.COLUMN_LATITUDE, latitude);
@@ -48,5 +56,29 @@ public class DatabaseWriterAdapter {
         long insertId = sqlDb.insert(DatabaseStatics.TABLE_STATION_LOC, null, values);
 
         return insertId;
+    }
+
+    public void bulkInsertMeterPointLocations(List<MeterPointLocationToDatabase> meterPointLocationList) {
+        String sql = "INSERT INTO "+ DatabaseStatics.TABLE_METER_POINT_LOC
+                + "(" + DatabaseStatics.COLUMN_ID + ","
+                + DatabaseStatics.COLUMN_LATITUDE + ","
+                + DatabaseStatics.COLUMN_LONGITUDE + ")"
+                +" VALUES (?,?,?);";
+
+        Log.i(getClass().getName(),sql);
+        Log.i(getClass().getName(),"size of list " + meterPointLocationList.size());
+        SQLiteStatement statement = sqlDb.compileStatement(sql);
+        sqlDb.beginTransaction();
+        for (MeterPointLocationToDatabase mpl :meterPointLocationList) {
+            statement.clearBindings();
+            //Log.i(getClass().getName(),"Insert info: meter id - " + mpl.getMeterId() + " latitude - " + mpl.getLatitude() + " longitude - " + mpl.getLongitude());
+
+            statement.bindLong(1, mpl.getMeterId());
+            statement.bindLong(2, mpl.getLatitude());
+            statement.bindLong(3, mpl.getLongitude());
+            statement.execute();
+        }
+        sqlDb.setTransactionSuccessful();
+        sqlDb.endTransaction();
     }
 }

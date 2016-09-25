@@ -3,15 +3,18 @@ package pl.atendesoftware.amitogo.database;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
 import pl.atendesoftware.amitogo.model.MeterPointLocation;
 
-/**
- * Created by Filip on 20.09.2016.
- */
+
 public class DatabaseReaderAdapter {
 
     // Database variables
@@ -46,5 +49,31 @@ public class DatabaseReaderAdapter {
         return meterPointLocations;
     }
 
+    public Set<MeterPointLocation> getMeterPointsByBounds(LatLngBounds bounds) {
+        Set<MeterPointLocation> meterPointLocations = new HashSet<>();
+
+        String queryColumns = "( " + DatabaseStatics.COLUMN_LATITUDE + " BETWEEN ? AND ? ) AND ("
+                + DatabaseStatics.COLUMN_LONGITUDE + " BETWEEN ? AND ? )";
+        String[] queryValues = new String[] {
+                String.valueOf(BigDecimal.valueOf(bounds.southwest.latitude).multiply(BigDecimal.valueOf(1000000)).setScale(0,BigDecimal.ROUND_DOWN)),
+                String.valueOf(BigDecimal.valueOf(bounds.northeast.latitude).multiply(BigDecimal.valueOf(1000000)).setScale(0,BigDecimal.ROUND_DOWN)),
+                String.valueOf(BigDecimal.valueOf(bounds.southwest.longitude).multiply(BigDecimal.valueOf(1000000)).setScale(0,BigDecimal.ROUND_DOWN)),
+                String.valueOf(BigDecimal.valueOf(bounds.northeast.longitude).multiply(BigDecimal.valueOf(1000000)).setScale(0,BigDecimal.ROUND_DOWN))
+        };
+
+        for(String s:queryValues){
+            Log.i(this.getClass().getName(),s);
+        }
+
+
+        Cursor cursor = sqlDb.query(DatabaseStatics.TABLE_METER_POINT_LOC, DatabaseStatics.allColumns, queryColumns, queryValues, null, null, null);
+
+        for (cursor.moveToLast(); !cursor.isBeforeFirst(); cursor.moveToPrevious()) {
+            meterPointLocations.add(DatabaseStatics.cursorToMeterPointLocation(cursor));
+        }
+        cursor.close();
+        return meterPointLocations;
+
+    }
 
 }

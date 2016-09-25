@@ -39,15 +39,15 @@ public class DatabaseStatics {
     // Station loc table
     public static final String CREATE_TABLE_STATION_LOC = "CREATE TABLE "
             + TABLE_STATION_LOC + "(" + COLUMN_ID + " INTEGER,"
-            + COLUMN_LATITUDE + " REAL, "
-            + COLUMN_LONGITUDE + " REAL );";
+            + COLUMN_LATITUDE + " INTEGER, "
+            + COLUMN_LONGITUDE + " INTEGER );";
 
 
     public static MeterPointLocation cursorToMeterPointLocation(Cursor cursor) {
         return new MeterPointLocation(
                 cursor.getLong(cursor.getColumnIndex(DatabaseStatics.COLUMN_ID)),
-                cursor.getDouble(cursor.getColumnIndex(DatabaseStatics.COLUMN_LATITUDE)),
-                cursor.getDouble(cursor.getColumnIndex(DatabaseStatics.COLUMN_LONGITUDE)));
+                (double)cursor.getLong(cursor.getColumnIndex(DatabaseStatics.COLUMN_LATITUDE))/1000000,
+                (double)cursor.getLong(cursor.getColumnIndex(DatabaseStatics.COLUMN_LONGITUDE))/1000000);
     }
 
     public static StationLocation cursorToStationLocation(Cursor cursor) {

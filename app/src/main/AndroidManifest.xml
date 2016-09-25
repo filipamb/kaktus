@@ -36,7 +36,12 @@
             android:name=".activities.StationDetailsActivity"
             android:parentActivityName=".activities.MainActivity" />
 
+        <!-- SERVICES -->
         <service android:name=".services.LocationUpdateService" />
+        <service
+            android:name=".services.MeterPointLocationService"
+            android:exported="false" />
+
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"

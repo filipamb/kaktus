@@ -1,8 +1,6 @@
 package pl.atendesoftware.amitogo.model;
 
-/**
- * Created by Ja on 2016-09-19.
- */
+
 public class StationLocation {
     private long stationId;
     private Double latitude;
