@@ -18,6 +18,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -32,15 +33,17 @@ import pl.atendesoftware.amitogo.model.MeterPointLocationToDatabase;
 
 public class MeterPointLocationService extends IntentService {
 
-    public final static String URL = "http://10.255.1.52:8080/ceu/rs/meterpointlocation";
+    public final static String URL = "http://192.168.0.14:8080/messenger/webapi/getmploc";
     public final static String DB_DOWNLOADED_PREFERENCE = "MeterPointLocationService Db Downloaded";
 
-
+    // zapisywacz bazy :D
     public DatabaseWriterAdapter databaseWriterAdapter = new DatabaseWriterAdapter(this);
+    // shared preferences
     public SharedPreferences preferences;
+    // norify manager
     public NotificationManager mNotifyManager;
     public NotificationCompat.Builder mBuilder;
-
+    // id dla naszego norification
     public int databaseUpdateNotificationId;
 
 
@@ -50,9 +53,9 @@ public class MeterPointLocationService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        // inicjalizacja shared preferences
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
         long start = System.currentTimeMillis();
-        databaseWriterAdapter.open();
 
 
         // inicjalizacja Notify Managera
@@ -63,6 +66,10 @@ public class MeterPointLocationService extends IntentService {
                 .setSmallIcon(R.drawable.energa_logo);
         databaseUpdateNotificationId = 1;
 
+        // otwarcie polaczenia z baza danych
+        databaseWriterAdapter.open();
+
+
         try {
 
             // notify Manager - start
@@ -70,38 +77,43 @@ public class MeterPointLocationService extends IntentService {
             mBuilder.setProgress(0, 0, true);
             mNotifyManager.notify(databaseUpdateNotificationId, mBuilder.build());
 
-
-
             // pobranie danych
             java.net.URL url = new URL(URL);
+
             URLConnection connection = url.openConnection();
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(5000);
             InputStream in = new BufferedInputStream(connection.getInputStream());
 
             // konwersja InputStream na String i dodawanie do bazy danych
             addToDatabase(streamToString(in));
 
             // notify Manager - koniec
-            mBuilder.setContentText("Database update complete").setProgress(0,0,false);
+            mBuilder.setContentText("Database update complete").setProgress(0, 0, false);
             mNotifyManager.notify(databaseUpdateNotificationId, mBuilder.build());
+
+            // dodanie do shared preferences info o sciagnieciu bazy danych jesli wszystko sie powiodlo
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putBoolean(DB_DOWNLOADED_PREFERENCE, true);
+            editor.commit();
+
+            Log.d(this.getClass().getName(), "onHandleIntent: Time of execution in seconds: " + (System.currentTimeMillis() - start) / 1000);
+
 
         } catch (Exception e) {
             e.printStackTrace();
 
-            // notify Manager - błąd
-            mBuilder.setContentText("Downloading file failed").setProgress(0,0,false);
+            // notify Manager - błąd przy pobieraniu danych
+            mBuilder.setContentText("Downloading file failed").setProgress(0, 0, false);
             mNotifyManager.notify(databaseUpdateNotificationId, mBuilder.build());
         }
 
+        // zamkniecie polaczenia z baza danych
         databaseWriterAdapter.close();
 
-        Log.d(this.getClass().getName(), "onHandleIntent: Time of execution in seconds: " + (System.currentTimeMillis() - start) / 1000);
-
-        // dodanie do shared preferences info o sciagnieciu bazy danych
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putBoolean(DB_DOWNLOADED_PREFERENCE, true);
-        editor.commit();
     }
 
+    // zamiana wyniku z url na stringa
     public String streamToString(InputStream is) {
         BufferedReader reader = new BufferedReader(new InputStreamReader(is));
         StringBuilder stringBuilder = new StringBuilder();
@@ -123,19 +135,19 @@ public class MeterPointLocationService extends IntentService {
         return stringBuilder.toString();
     }
 
+    // dodawanie stringa wynikowego (z obiektami json) do bazy
     public void addToDatabase(String input) throws JSONException {
         int count = 0;
         List<MeterPointLocationToDatabase> meterPointLocationList = new ArrayList<>();
 
         Log.i(this.getClass().getSimpleName(), "Getting json Array");
+        Log.i(this.getClass().getSimpleName(), "Parsing array ...........");
         JSONArray jsonArray = new JSONArray(input);
         JSONObject jsonObject;
-        Log.i(this.getClass().getSimpleName(), "Parsing array ...........");
         Log.i(this.getClass().getSimpleName(), "Array length " + jsonArray.length());
 
 
         for (int i = 0; i < jsonArray.length(); i += 100) {
-
 
 
             int loop_range = jsonArray.length() >= i + 100 ? 100 : jsonArray.length() - i;
@@ -148,15 +160,14 @@ public class MeterPointLocationService extends IntentService {
                         jsonObject.getLong("y")));
 
 
-
             }
             count++;
             databaseWriterAdapter.bulkInsertMeterPointLocations(meterPointLocationList);
             meterPointLocationList.clear();
-            Log.i("parseMeterPointLocation", "bulk iserted for " + count + " time and percentage = " + (100*i/jsonArray.length()) + " %");
+            Log.i("parseMeterPointLocation", "bulk iserted for " + count + " time and percentage = " + (100 * i / jsonArray.length()) + " %");
 
             mBuilder.setContentText("Updating database...");
-            mBuilder.setProgress(100,100*i/jsonArray.length(),false);
+            mBuilder.setProgress(100, 100 * i / jsonArray.length(), false);
             mNotifyManager.notify(databaseUpdateNotificationId, mBuilder.build());
         }
         Log.i(this.getClass().getSimpleName(), "Array length " + jsonArray.length());

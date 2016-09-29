@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -34,6 +35,7 @@ import pl.atendesoftware.amitogo.database.DatabaseReaderAdapter;
 import pl.atendesoftware.amitogo.database.DatabaseWriterAdapter;
 import pl.atendesoftware.amitogo.model.MeterPointLocation;
 import pl.atendesoftware.amitogo.services.LocationUpdateService;
+import pl.atendesoftware.amitogo.services.MeterPointLocationService;
 
 public class MapFragment extends Fragment
         implements OnMapReadyCallback {
@@ -52,7 +54,12 @@ public class MapFragment extends Fragment
     private LocationUpdateReceiver mLocationUpdateReceiver = null;
 
     private DatabaseReaderAdapter databaseReaderAdapter;
-    Set<MeterPointLocation> allMeterPointLocations;
+
+    // wartosci do lokalizacji mapy
+    private static int CAMERA_MOVE_REACT_THRESHOLD_MS = 500;
+    private long lastCallMs = Long.MIN_VALUE;
+    private LatLngBounds currentCameraBounds = new LatLngBounds(
+            new LatLng(49.0300, 14.1400), new LatLng(55.9500, 24.1600));
 
     @Nullable
     @Override
@@ -129,9 +136,6 @@ public class MapFragment extends Fragment
                                                    return;
                                                }
 
-        databaseReaderAdapter.close();
-
-        setUpClusterer();
                                                final long snap = System.currentTimeMillis();
                                                if (lastCallMs + CAMERA_MOVE_REACT_THRESHOLD_MS > snap) {
                                                    lastCallMs = snap;
@@ -141,19 +145,22 @@ public class MapFragment extends Fragment
                                                Log.i(this.getClass().getName(), "On camera Change!!!!!!!!!!!!!!");
 
 
-                                               /*databaseReaderAdapter.open();
+                                               databaseReaderAdapter.open();
                                                Set<MeterPointLocation> meterPointsByBounds = databaseReaderAdapter.getMeterPointsByBounds(bounds);
                                                databaseReaderAdapter.close();
-                                               for(MeterPointLocation mpl:meterPointsByBounds){
-                                                   Log.i(this.getClass().getName(),"Meter point with id " + mpl.getMeterId() + " longitude " +mpl.getLongitude()+ " and latitude " + mpl.getLatitude());
-                                               }*/
+
+                                               setUpClusterer(meterPointsByBounds);
+
+                                               Log.i(this.getClass().getName(), "Number of meters: " + meterPointsByBounds.size());
+
+
                                                lastCallMs = snap;
                                                currentCameraBounds = bounds;
 
                                            }
                                        }
 
-            );
+        );
     }
 
     private class LocationUpdateReceiver extends BroadcastReceiver {
@@ -169,6 +176,9 @@ public class MapFragment extends Fragment
         Toast.makeText(mContext, "" + mMap.getProjection().getVisibleRegion().latLngBounds, Toast.LENGTH_LONG).show();
     }
 
+
+
+
     private class MyItem implements ClusterItem {
         private final LatLng mPosition;
 
@@ -182,34 +192,26 @@ public class MapFragment extends Fragment
         }
     }
 
-    private void setUpClusterer() {
+    private void setUpClusterer(Set<MeterPointLocation> meterPointLocationSet) {
         // Position the map.
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(51.503186, -0.126446), 10));
+        //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(51.503186, -0.126446), 10));
 
         // Initialize the manager with the context and the map.
         // (Activity extends context, so we can pass 'this' in the constructor.)
         mClusterManager = new ClusterManager<MyItem>(mContext, mMap);
-
+        mClusterManager.clearItems();
         // Point the map's listeners at the listeners implemented by the cluster
         // manager.
         mMap.setOnMarkerClickListener(mClusterManager);
         mMap.setOnCameraChangeListener(mClusterManager);
         // Add cluster items (markers) to the cluster manager.
-        addItems();
+        addItems(meterPointLocationSet);
     }
 
-    private void addItems() {
-
-        // Set some lat/lng coordinates to start with.
-        double lat = 51.5145160;
-        double lng = -0.1270060;
-
+    private void addItems(Set<MeterPointLocation> meterPointLocationSet) {
         // Add ten cluster items in close proximity, for purposes of this example.
-        for (int i = 0; i < 10; i++) {
-            double offset = i / 60d;
-            lat = lat + offset;
-            lng = lng + offset;
-            MyItem offsetItem = new MyItem(lat, lng);
+        for (MeterPointLocation mpl:meterPointLocationSet) {
+            MyItem offsetItem = new MyItem(mpl.getLatitude(), mpl.getLongitude());
             mClusterManager.addItem(offsetItem);
         }
     }
