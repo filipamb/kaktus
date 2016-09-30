@@ -121,7 +121,7 @@ public class MapFragment extends Fragment
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.setMyLocationEnabled(true);
-
+        /*
         mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
 
 
@@ -161,6 +161,10 @@ public class MapFragment extends Fragment
                                        }
 
         );
+        */
+        databaseReaderAdapter.open();
+        setUpClusterer(databaseReaderAdapter.getAllMeterPointLocations());
+        databaseReaderAdapter.close();
     }
 
     private class LocationUpdateReceiver extends BroadcastReceiver {

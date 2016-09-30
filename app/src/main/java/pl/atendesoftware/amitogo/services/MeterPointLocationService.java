@@ -33,7 +33,7 @@ import pl.atendesoftware.amitogo.model.MeterPointLocationToDatabase;
 
 public class MeterPointLocationService extends IntentService {
 
-    public final static String URL = "http://192.168.0.14:8080/messenger/webapi/getmploc";
+    public final static String URL = "http://10.255.1.52:8080/ceu/rs/meterpointlocation";
     public final static String DB_DOWNLOADED_PREFERENCE = "MeterPointLocationService Db Downloaded";
 
     // zapisywacz bazy :D
