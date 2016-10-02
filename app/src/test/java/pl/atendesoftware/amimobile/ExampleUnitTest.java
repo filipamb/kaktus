@@ -1,4 +1,4 @@
-package pl.atendesoftware.amitogo;
+package pl.atendesoftware.amimobile;
 
 import org.junit.Test;
 

@@ -1,4 +1,4 @@
-package pl.atendesoftware.amitogo.model;
+package pl.atendesoftware.amimobile.model;
 
 
 public class StationLocation {

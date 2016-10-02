@@ -1,8 +1,13 @@
-package pl.atendesoftware.amitogo.activities;
+package pl.atendesoftware.amimobile.activities;
 
+import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.location.Location;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -13,18 +18,24 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
-import pl.atendesoftware.amitogo.R;
-import pl.atendesoftware.amitogo.fragments.MapFragment;
-import pl.atendesoftware.amitogo.services.MeterPointLocationService;
+import pl.atendesoftware.amimobile.R;
+import pl.atendesoftware.amimobile.fragments.MapFragment;
+import pl.atendesoftware.amimobile.helpers.SharedPreferencesHelper;
+import pl.atendesoftware.amimobile.services.LocationUpdateService;
+import pl.atendesoftware.amimobile.services.MeterPointLocationService;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    private ProgressUpdateReceiver mProgressUpdateReceiver = null;
+    private ProgressDialog mProgressDialog = null;
     private Context mContext;
 
     @Override
@@ -33,13 +44,12 @@ public class MainActivity extends AppCompatActivity
 
         mContext = this;
 
-
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         // Bierzemy fragment Managera
-        FragmentManager fragmentManager =  getSupportFragmentManager();
+        FragmentManager fragmentManager = getSupportFragmentManager();
 
         // Tworzymy fragment i przypisujemy mu bundle z listą meter pointów
         MapFragment mapFragment = new MapFragment();
@@ -53,40 +63,51 @@ public class MainActivity extends AppCompatActivity
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
+        SharedPreferences prefs = getSharedPreferences("amimobile", Context.MODE_PRIVATE);
+        TextView drawerUsername = (TextView) findViewById(R.id.drawer_username);
+        TextView drawerEmail = (TextView) findViewById(R.id.drawer_email);
+        drawerUsername.setText(prefs.getString("name", "Atende Software"));
+        drawerEmail.setText(prefs.getString("email", "atendesoftware@amimobile.pl"));
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         // sprawdzenie, czy pobralismy juz baze danych
-        if(!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(MeterPointLocationService.DB_DOWNLOADED_PREFERENCE,false)) {
+        if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(MeterPointLocationService.DB_DOWNLOADED_PREFERENCE, false)) {
             Log.i(this.getClass().getName(), "Shared preference FALSE");
 
-            AlertDialog.Builder downloadDatabaseDialogBuilder = new AlertDialog.Builder(mContext);
+            Intent intent = new Intent(mContext, MeterPointLocationService.class);
+            startService(intent);
 
-            downloadDatabaseDialogBuilder.setMessage(getString(R.string.download_db_dialog_message))
-                    .setCancelable(false)
-                    .setPositiveButton(getString(R.string.download_db_dialog_positive_button_name), new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.cancel();
-                            Intent intent = new Intent(mContext,MeterPointLocationService.class);
-                            startService(intent);
-                        }
-                    })
-                    .setNegativeButton(getString(R.string.download_db_dialog_negative_button_name), new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            finish();
-                        }
-                    });
-
-            AlertDialog downloadDatabaseDialog = downloadDatabaseDialogBuilder.create();
-            downloadDatabaseDialog.setTitle(getString(R.string.download_db_dialog_title));
-            downloadDatabaseDialog.show();
+            mProgressDialog = new ProgressDialog(mContext);
+            mProgressDialog.setTitle("Download");
+            mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            mProgressDialog.show();
         } else {
             Log.i(this.getClass().getName(), "Shared preference TRUE");
         }
+    }
 
+    private class ProgressUpdateReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getAction().equals(MeterPointLocationService.UPDATE_ACTION)) {
+                Log.i("AMI", "Update Progress");
+                mProgressDialog.setProgress(intent.getIntExtra("progress", 0));
+            } else if(intent.getAction().equals(MeterPointLocationService.UPDATE_FINISHED_ACTION)) {
+                mProgressDialog.dismiss();
+            }
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mProgressUpdateReceiver = new ProgressUpdateReceiver();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(MeterPointLocationService.UPDATE_ACTION);
+        intentFilter.addAction(MeterPointLocationService.UPDATE_FINISHED_ACTION);
+        mContext.registerReceiver(mProgressUpdateReceiver, intentFilter);
     }
 
     @Override
@@ -101,8 +122,9 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+        getMenuInflater().inflate(R.menu.activity_main_main_menu, menu);
+        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        searchView.setQueryHint("Wyszukaj...");
         return true;
     }
 
@@ -114,7 +136,7 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_search) {
             return true;
         }
 
@@ -133,8 +155,8 @@ public class MainActivity extends AppCompatActivity
             case R.id.mode_3D:
                 break;
             case R.id.logout:
-                getSharedPreferences("amitogo", Context.MODE_PRIVATE).edit().putBoolean("loggedIn",false).apply();
-                Intent intent = new Intent(MainActivity.this,LoginActivity.class);
+                SharedPreferencesHelper.remove(mContext, SharedPreferencesHelper.app_user_login_key);
+                Intent intent = new Intent(MainActivity.this, LoginActivity.class);
                 startActivity(intent);
                 finish();
                 break;

@@ -1,18 +1,17 @@
-package pl.atendesoftware.amitogo.database;
+package pl.atendesoftware.amimobile.database;
 
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
-import pl.atendesoftware.amitogo.model.MeterPointLocation;
+import pl.atendesoftware.amimobile.model.MeterPointLocation;
 
 
 public class DatabaseReaderAdapter {

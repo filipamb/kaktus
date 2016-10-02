@@ -1,9 +1,9 @@
-package pl.atendesoftware.amitogo.activities;
+package pl.atendesoftware.amimobile.activities;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-import pl.atendesoftware.amitogo.R;
+import pl.atendesoftware.amimobile.R;
 
 public class MeterPointDetailsActivity extends AppCompatActivity {
 

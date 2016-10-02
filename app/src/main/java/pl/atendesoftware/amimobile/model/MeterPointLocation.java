@@ -1,12 +1,17 @@
-package pl.atendesoftware.amitogo.model;
+package pl.atendesoftware.amimobile.model;
 
-public class MeterPointLocationToDatabase {
+
+
+public class MeterPointLocation {
 
     private long meterId;
-    private long latitude;
-    private long longitude;
+    private double latitude;
+    private double longitude;
 
-    public MeterPointLocationToDatabase(long meterId, long latitude, long longitude) {
+    public MeterPointLocation() {
+    }
+
+    public MeterPointLocation(long meterId, double latitude, double longitude) {
         this.meterId = meterId;
         this.latitude = latitude;
         this.longitude = longitude;
@@ -20,19 +25,19 @@ public class MeterPointLocationToDatabase {
         this.meterId = meterId;
     }
 
-    public long getLatitude() {
+    public double getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(long latitude) {
+    public void setLatitude(double latitude) {
         this.latitude = latitude;
     }
 
-    public long getLongitude() {
+    public double getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(long longitude) {
+    public void setLongitude(double longitude) {
         this.longitude = longitude;
     }
 }

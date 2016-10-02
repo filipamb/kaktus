@@ -1,16 +1,14 @@
-package pl.atendesoftware.amitogo.database;
+package pl.atendesoftware.amimobile.database;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
-import android.provider.ContactsContract;
 import android.util.Log;
 
 import java.util.List;
 
-import pl.atendesoftware.amitogo.model.MeterPointLocation;
-import pl.atendesoftware.amitogo.model.MeterPointLocationToDatabase;
+import pl.atendesoftware.amimobile.model.MeterPointLocationToDatabase;
 
 public class DatabaseWriterAdapter {
 

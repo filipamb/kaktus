@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="pl.atendesoftware.amitogo">
+    package="pl.atendesoftware.amimobile">
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -11,6 +11,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
 
+        <!-- ACTIVITIES -->
         <activity
             android:name=".activities.LoginActivity"
             android:theme="@style/AppTheme.NoActionBar">
@@ -25,11 +26,11 @@
             android:theme="@style/AppTheme.NoActionBar" />
 
         <activity
-            android:name=".activities.MeterPointDetailsActivity"
+            android:name=".activities.MeterPointListActivity"
             android:parentActivityName=".activities.MainActivity" />
 
         <activity
-            android:name=".activities.MeterPointListActivity"
+            android:name=".activities.MeterPointDetailsActivity"
             android:parentActivityName=".activities.MainActivity" />
 
         <activity
@@ -38,11 +39,9 @@
 
         <!-- SERVICES -->
         <service android:name=".services.LocationUpdateService" />
-        <service
-            android:name=".services.MeterPointLocationService"
-            android:exported="false" />
+        <service android:name=".services.MeterPointLocationService" />
 
-
+        <!-- META -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />

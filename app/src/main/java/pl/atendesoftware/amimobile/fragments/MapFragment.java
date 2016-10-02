@@ -1,4 +1,4 @@
-package pl.atendesoftware.amitogo.fragments;
+package pl.atendesoftware.amimobile.fragments;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -6,11 +6,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,22 +18,17 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.clustering.ClusterItem;
 import com.google.maps.android.clustering.ClusterManager;
 
 import java.util.Set;
 
-import pl.atendesoftware.amitogo.R;
-import pl.atendesoftware.amitogo.database.DatabaseReaderAdapter;
-import pl.atendesoftware.amitogo.database.DatabaseWriterAdapter;
-import pl.atendesoftware.amitogo.model.MeterPointLocation;
-import pl.atendesoftware.amitogo.services.LocationUpdateService;
-import pl.atendesoftware.amitogo.services.MeterPointLocationService;
+import pl.atendesoftware.amimobile.R;
+import pl.atendesoftware.amimobile.database.DatabaseReaderAdapter;
+import pl.atendesoftware.amimobile.model.MeterPointLocation;
+import pl.atendesoftware.amimobile.services.LocationUpdateService;
 
 public class MapFragment extends Fragment
         implements OnMapReadyCallback {

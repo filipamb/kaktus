@@ -1,4 +1,4 @@
-package pl.atendesoftware.amitogo.activities;
+package pl.atendesoftware.amimobile.activities;
 
 import android.content.Context;
 import android.content.Intent;
@@ -10,7 +10,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import pl.atendesoftware.amitogo.R;
+import pl.atendesoftware.amimobile.R;
+import pl.atendesoftware.amimobile.helpers.SharedPreferencesHelper;
 
 public class LoginActivity extends AppCompatActivity {
     private TextView mUsernameField = null;
@@ -32,12 +33,10 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (mUsernameField.getText().toString().equals("admin") && mPasswordField.getText().toString().equals("admin")) {
-                    SharedPreferences preferences = mContext.getSharedPreferences("amitogo",Context.MODE_PRIVATE);
-                    SharedPreferences.Editor editor = preferences.edit();
-
-                    editor.putBoolean("loggedIn",true);
-                    editor.putString("username","admin");
-                    editor.apply();
+                    SharedPreferencesHelper.putValue(mContext, SharedPreferencesHelper.app_user_login_key, true);
+                    SharedPreferencesHelper.putValue(mContext, SharedPreferencesHelper.app_user_username_key, mUsernameField.getText().toString());
+                    SharedPreferencesHelper.putValue(mContext, SharedPreferencesHelper.app_user_name_key, "Atende Software");
+                    SharedPreferencesHelper.putValue(mContext, SharedPreferencesHelper.app_user_email_key, "atendesoftware@amimobile.pl");
 
                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                     startActivity(intent);
@@ -52,12 +51,12 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        if(mContext.getSharedPreferences("amitogo",Context.MODE_PRIVATE).getBoolean("loggedIn",false)){
-            Intent intent = new Intent(LoginActivity.this,MainActivity.class);
+        if (SharedPreferencesHelper.getBoolean(mContext, SharedPreferencesHelper.app_user_login_key, false)) {
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
             startActivity(intent);
             finish();
         } else {
-            mUsernameField.setText(mContext.getSharedPreferences("amitogo",Context.MODE_PRIVATE).getString("username",""));
+            mUsernameField.setText(SharedPreferencesHelper.getString(mContext, SharedPreferencesHelper.app_user_username_key, ""));
         }
     }
 }

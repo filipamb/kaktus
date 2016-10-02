@@ -1,4 +1,4 @@
-package pl.atendesoftware.amitogo.services;
+package pl.atendesoftware.amimobile.services;
 
 import android.app.IntentService;
 import android.app.NotificationManager;
@@ -18,21 +18,18 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
-import pl.atendesoftware.amitogo.R;
-import pl.atendesoftware.amitogo.activities.MainActivity;
-import pl.atendesoftware.amitogo.database.DatabaseWriterAdapter;
-import pl.atendesoftware.amitogo.model.MeterPointLocation;
-import pl.atendesoftware.amitogo.model.MeterPointLocationToDatabase;
-
+import pl.atendesoftware.amimobile.R;
+import pl.atendesoftware.amimobile.activities.MainActivity;
+import pl.atendesoftware.amimobile.database.DatabaseWriterAdapter;
+import pl.atendesoftware.amimobile.model.MeterPointLocation;
+import pl.atendesoftware.amimobile.model.MeterPointLocationToDatabase;
 
 public class MeterPointLocationService extends IntentService {
-
     public final static String URL = "http://10.255.1.52:8080/ceu/rs/meterpointlocation";
     public final static String DB_DOWNLOADED_PREFERENCE = "MeterPointLocationService Db Downloaded";
 
@@ -46,6 +43,8 @@ public class MeterPointLocationService extends IntentService {
     // id dla naszego norification
     public int databaseUpdateNotificationId;
 
+    public static final String UPDATE_ACTION = "UPDATED";
+    public static final String UPDATE_FINISHED_ACTION = "UPDATE_FINISHED";
 
     public MeterPointLocationService() {
         super(MeterPointLocation.class.getName());
@@ -95,7 +94,7 @@ public class MeterPointLocationService extends IntentService {
             // dodanie do shared preferences info o sciagnieciu bazy danych jesli wszystko sie powiodlo
             SharedPreferences.Editor editor = preferences.edit();
             editor.putBoolean(DB_DOWNLOADED_PREFERENCE, true);
-            editor.commit();
+            editor.apply();
 
             Log.d(this.getClass().getName(), "onHandleIntent: Time of execution in seconds: " + (System.currentTimeMillis() - start) / 1000);
 
@@ -148,8 +147,6 @@ public class MeterPointLocationService extends IntentService {
 
 
         for (int i = 0; i < jsonArray.length(); i += 100) {
-
-
             int loop_range = jsonArray.length() >= i + 100 ? 100 : jsonArray.length() - i;
 
             for (int j = 0; j < loop_range; j++) {
@@ -158,8 +155,6 @@ public class MeterPointLocationService extends IntentService {
                         jsonObject.getLong("meterPointId"),
                         jsonObject.getLong("x"),
                         jsonObject.getLong("y")));
-
-
             }
             count++;
             databaseWriterAdapter.bulkInsertMeterPointLocations(meterPointLocationList);
@@ -169,9 +164,16 @@ public class MeterPointLocationService extends IntentService {
             mBuilder.setContentText("Updating database...");
             mBuilder.setProgress(100, 100 * i / jsonArray.length(), false);
             mNotifyManager.notify(databaseUpdateNotificationId, mBuilder.build());
+
+            Intent intent = new Intent();
+            intent.setAction(UPDATE_ACTION);
+            intent.putExtra("progress", 100 * i / jsonArray.length());
+            sendBroadcast(intent);
         }
         Log.i(this.getClass().getSimpleName(), "Array length " + jsonArray.length());
 
-
+        Intent intent = new Intent();
+        intent.setAction(UPDATE_FINISHED_ACTION);
+        sendBroadcast(intent);
     }
 }

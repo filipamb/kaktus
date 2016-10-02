@@ -1,4 +1,4 @@
-package pl.atendesoftware.amitogo.services;
+package pl.atendesoftware.amimobile.services;
 
 import android.app.Service;
 import android.content.Intent;
@@ -42,7 +42,9 @@ public class LocationUpdateService extends Service implements ConnectionCallback
 
     @Override
     public void onDestroy() {
-        stopLocationUpdates();
+        if(mGoogleApiClient.isConnected()) {
+            stopLocationUpdates();
+        }
         mGoogleApiClient.disconnect();
         super.onDestroy();
     }

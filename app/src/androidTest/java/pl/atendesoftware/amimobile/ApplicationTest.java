@@ -1,4 +1,4 @@
-package pl.atendesoftware.amitogo;
+package pl.atendesoftware.amimobile;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

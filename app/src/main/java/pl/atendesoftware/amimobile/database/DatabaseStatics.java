@@ -1,9 +1,9 @@
-package pl.atendesoftware.amitogo.database;
+package pl.atendesoftware.amimobile.database;
 
 import android.database.Cursor;
 
-import pl.atendesoftware.amitogo.model.MeterPointLocation;
-import pl.atendesoftware.amitogo.model.StationLocation;
+import pl.atendesoftware.amimobile.model.MeterPointLocation;
+import pl.atendesoftware.amimobile.model.StationLocation;
 
 public class DatabaseStatics {
 
@@ -14,7 +14,7 @@ public class DatabaseStatics {
     public static final int DATABASE_VERSION = 1;
 
     // Database Name
-    public static final String DATABASE_NAME = "amitogo";
+    public static final String DATABASE_NAME = "amimobile";
 
     // Table Names
     public static final String TABLE_METER_POINT_LOC = "meter_point_loc";
